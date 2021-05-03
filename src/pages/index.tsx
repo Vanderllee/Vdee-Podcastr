@@ -1,15 +1,15 @@
+import { useContext } from 'react';
 import { GetStaticProps } from 'next';
 import { format, parseISO } from 'date-fns';
+import { api } from "../services/api"
+import { convertDurationToTimeString } from '../utils/convertDurationTimeString';
+
+import Link from 'next/link';
+import Image from 'next/image';
 import ptBR from 'date-fns/locale/pt-BR';
 
 import styles from '../styles/home.module.scss';
-
-import Image from 'next/image';
-import Link from 'next/link';
-
-import { api } from "../services/api"
-
-import { convertDurationToTimeString } from '../utils/convertDurationTimeString';
+import { PlayerContext } from '../contexts/PlayerContext';
 
 type Episode = {
   id: string;
@@ -17,7 +17,7 @@ type Episode = {
   thumbnail: string;
   members: string;
   duration: number;
-  duratioAsString: string;
+  durationAsString: string;
   url: string;
   publishedAt: string;
 }
@@ -29,6 +29,8 @@ type HomeProps = {
 
 
 export default function Home({allEpisodes, latestEpisodes}: HomeProps) {
+
+  const { play } = useContext(PlayerContext);
 
   return (
     <div>
@@ -48,10 +50,10 @@ export default function Home({allEpisodes, latestEpisodes}: HomeProps) {
                       </Link>
                       <p>{episode.members}</p>
                       <span>{episode.publishedAt}</span>
-                      <span>{episode.duratioAsString}</span>
+                      <span>{episode.durationAsString}</span>
                     </div>
 
-                    <button type="button">
+                    <button type="button" onClick={(_) => play(episode)} >
                       <img src="/play-green.svg" alt="Tocar episódeo"/>
                     </button>
                 </li>
@@ -95,7 +97,7 @@ export default function Home({allEpisodes, latestEpisodes}: HomeProps) {
                     </td>
                     <td>{episode.members}</td>
                     <td style={{width: 72}}>{episode.publishedAt}</td>
-                    <td>{episode.duratioAsString}</td>
+                    <td>{episode.durationAsString}</td>
                     <td>
                         <button type="button">
                           <img src="/play-green.svg" alt="Tocar episódio" />
@@ -130,7 +132,7 @@ export const getStaticProps: GetStaticProps = async() =>  {
       members: episode.members,
       publishedAt: format(parseISO(episode.published_at), 'd MMM yy', {locale: ptBR}),
       duration: Number(episode.file.duration),
-      duratioAsString: convertDurationToTimeString(Number(episode.file.duration)),
+      durationAsString: convertDurationToTimeString(Number(episode.file.duration)),
       url: episode.file.url,
     };
   })
