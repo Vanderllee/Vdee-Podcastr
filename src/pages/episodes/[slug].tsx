@@ -1,13 +1,16 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
+import Head from 'next/head';
 import Image from 'next/image';
-import {useRouter} from 'next/router';
+
 import { api } from '../../services/api';
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { convertDurationToTimeString } from '../../utils/convertDurationTimeString';
 
+
 import styles from './episode.module.scss';
+import { usePlayer } from '../../contexts/PlayerContext';
 
 type Episode ={
     id: string;
@@ -26,10 +29,15 @@ type EpisodeProps = {
 }
 
 export default function Episode({episode}: EpisodeProps) {
-    const router = useRouter();
+    // const router = useRouter();
+    const { play } = usePlayer(); 
 
     return (
         <div className={styles.episode}>
+            <Head>
+                <title>{episode.title} | Podcastr</title>
+            </Head>
+            
             <div className={styles.thumbnailContainer}>
                 <button type="button">
                     <Link href="/">
@@ -38,13 +46,13 @@ export default function Episode({episode}: EpisodeProps) {
                 </button>
 
                 <Image 
-                    width={700}
+                    width={200}
                     height={160}
                     src={episode.thumbnail}
                     objectFit="cover"
                 />
 
-                <button type="button">
+                <button type="button" onClick= {() => play(episode)}>
                     <img src="/play.svg" alt="Tocar episódio" />
                 </button>
             </div>
@@ -97,3 +105,4 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
         revalidate: 60*60*24,
     }
 }
+
